@@ -1,4 +1,4 @@
-pragma solidity 0.5.4;
+pragma solidity 0.5.11;
 pragma experimental ABIEncoderV2;
 
 library Utils {
@@ -14,7 +14,7 @@ library Utils {
         return mulmod(x, y, GROUP_ORDER);
     }
 
-    function inv(uint256 x) internal view returns (uint256) {
+    function inv(uint256 x) internal returns (uint256) {
         return exp(x, GROUP_ORDER - 2);
     }
 
@@ -30,7 +30,7 @@ library Utils {
         return GROUP_ORDER - x;
     }
 
-    function exp(uint256 base, uint256 exponent) internal view returns (uint256 output) {
+    function exp(uint256 base, uint256 exponent) internal returns (uint256 output) {
         uint256 order = GROUP_ORDER;
         assembly {
             let m := mload(0x40)
@@ -40,7 +40,7 @@ library Utils {
             mstore(add(m, 0x60), base)
             mstore(add(m, 0x80), exponent)
             mstore(add(m, 0xa0), order)
-            if iszero(staticcall(gas, 0x05, m, 0xc0, m, 0x20)) { // staticcall or call?
+            if iszero(call(gas, 0x05,0, m, 0xc0, m, 0x20)) { // staticcall or call?
                 revert(0, 0)
             }
             output := mload(m)

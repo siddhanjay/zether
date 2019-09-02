@@ -1,4 +1,4 @@
-pragma solidity 0.5.4;
+pragma solidity 0.5.11;
 pragma experimental ABIEncoderV2;
 
 import "./Utils.sol";
@@ -97,7 +97,7 @@ contract ZetherVerifier {
         }
     }
 
-    function verifyTransfer(bytes32[2][] memory CLn, bytes32[2][] memory CRn, bytes32[2][] memory L, bytes32[2] memory R, bytes32[2][] memory y, uint256 epoch, bytes32[2] memory u, bytes memory proof) view public returns (bool) {
+    function verifyTransfer(bytes32[2][] memory CLn, bytes32[2][] memory CRn, bytes32[2][] memory L, bytes32[2] memory R, bytes32[2][] memory y, uint256 epoch, bytes32[2] memory u, bytes memory proof) public returns (bool) {
         ZetherStatement memory statement;
         uint256 size = y.length;
         require(gs.length >= size, "Inadequate stored vector base! Call extendBase and then try again.");
@@ -169,7 +169,7 @@ contract ZetherVerifier {
         uint256[m] otherExponents;
     }
 
-    function verify(ZetherStatement memory statement, ZetherProof memory proof) view internal returns (bool) {
+    function verify(ZetherStatement memory statement, ZetherProof memory proof) internal returns (bool) {
         ZetherAuxiliaries memory zetherAuxiliaries;
         zetherAuxiliaries.y = uint256(keccak256(abi.encode(uint256(keccak256(abi.encode(statement.epoch, statement.R, statement.CLn, statement.CRn, statement.L, statement.y))).mod(), proof.A, proof.S))).mod();
         zetherAuxiliaries.ys = powers(zetherAuxiliaries.y);
@@ -326,7 +326,7 @@ contract ZetherVerifier {
         return true;
     }
 
-    function assembleConvolutions(uint256[2][] memory exponent, G1Point[] memory base) internal view returns (G1Point[2][] memory result) {
+    function assembleConvolutions(uint256[2][] memory exponent, G1Point[] memory base) internal returns (G1Point[2][] memory result) {
         // exponent is two "rows" (actually columns).
         // will return two rows, each of half the length of the exponents;
         // namely, we will return the Hadamards of "base" by the even circular shifts of "exponent"'s rows.
@@ -358,7 +358,7 @@ contract ZetherVerifier {
         return result;
     }
 
-    function fft(G1Point[] memory input, bool inverse) internal view returns (G1Point[] memory result) {
+    function fft(G1Point[] memory input, bool inverse) internal returns (G1Point[] memory result) {
         uint256 size = input.length;
         if (size == 1) {
             return input;
@@ -391,7 +391,7 @@ contract ZetherVerifier {
         }
     }
 
-    function fft(uint256[] memory input) internal view returns (uint256[] memory result) {
+    function fft(uint256[] memory input) internal returns (uint256[] memory result) {
         uint256 size = input.length;
         if (size == 1) {
             return input;
@@ -484,7 +484,7 @@ contract ZetherVerifier {
         }
     }
 
-    function hadamard_inv(G1Point[] memory ps, uint256[m] memory ss) internal view returns (G1Point[m] memory result) {
+    function hadamard_inv(G1Point[] memory ps, uint256[m] memory ss) internal returns (G1Point[m] memory result) {
         for (uint256 i = 0; i < m; i++) {
             result[i] = mul(ps[i], ss[i].inv());
         }
@@ -496,13 +496,13 @@ contract ZetherVerifier {
         }
     }
 
-    function sumPoints(G1Point[] memory ps) internal view returns (G1Point memory sum) {
+    function sumPoints(G1Point[] memory ps) internal returns (G1Point memory sum) {
         for (uint256 i = 0; i < m; i++) {
             sum = add(sum, ps[i]);
         }
     }
 
-    function commit(G1Point[m] memory ps, uint256[m] memory ss) internal view returns (G1Point memory result) {
+    function commit(G1Point[m] memory ps, uint256[m] memory ss) internal returns (G1Point memory result) {
         for (uint256 i = 0; i < m; i++) { // killed a silly initialization with the 0th indexes. [0x00, 0x00] will be treated as the zero point anyway
             result = add(result, mul(ps[i], ss[i]));
         }
@@ -535,26 +535,26 @@ contract ZetherVerifier {
         uint256 y;
     }
 
-    function add(G1Point memory p1, G1Point memory p2) internal view returns (G1Point memory r) {
+    function add(G1Point memory p1, G1Point memory p2) internal returns (G1Point memory r) {
         assembly {
             let m := mload(0x40)
             mstore(m, mload(p1))
             mstore(add(m, 0x20), mload(add(p1, 0x20)))
             mstore(add(m, 0x40), mload(p2))
             mstore(add(m, 0x60), mload(add(p2, 0x20)))
-            if iszero(staticcall(gas, 0x06, m, 0x80, r, 0x40)) {
+            if iszero(call(gas, 0x06,0, m, 0x80, r, 0x40)) {
                 revert(0, 0)
             }
         }
     }
 
-    function mul(G1Point memory p, uint256 s) internal view returns (G1Point memory r) {
+    function mul(G1Point memory p, uint256 s) internal returns (G1Point memory r) {
         assembly {
             let m := mload(0x40)
             mstore(m, mload(p))
             mstore(add(m, 0x20), mload(add(p, 0x20)))
             mstore(add(m, 0x40), s)
-            if iszero(staticcall(gas, 0x07, m, 0x60, r, 0x40)) {
+            if iszero(call(gas, 0x07,0, m, 0x60, r, 0x40)) {
                 revert(0, 0)
             }
         }
@@ -568,7 +568,7 @@ contract ZetherVerifier {
         return p1.x == p2.x && p1.y == p2.y;
     }
 
-    function fieldExp(uint256 base, uint256 exponent) internal view returns (uint256 output) { // warning: mod p, not q
+    function fieldExp(uint256 base, uint256 exponent) internal returns (uint256 output) { // warning: mod p, not q
         uint256 order = FIELD_ORDER;
         assembly {
             let m := mload(0x40)
@@ -578,14 +578,14 @@ contract ZetherVerifier {
             mstore(add(m, 0x60), base)
             mstore(add(m, 0x80), exponent)
             mstore(add(m, 0xa0), order)
-            if iszero(staticcall(gas, 0x05, m, 0xc0, m, 0x20)) { // staticcall or call?
+            if iszero(call(gas, 0x05,0, m, 0xc0, m, 0x20)) { // staticcall or call?
                 revert(0, 0)
             }
             output := mload(m)
         }
     }
 
-    function mapInto(uint256 seed) internal view returns (G1Point memory) { // warning: function totally untested!
+    function mapInto(uint256 seed) internal returns (G1Point memory) { // warning: function totally untested!
         uint256 y;
         while (true) {
             uint256 ySquared = fieldExp(seed, 3) + 3; // addmod instead of add: waste of gas, plus function overhead cost
@@ -598,11 +598,11 @@ contract ZetherVerifier {
         return G1Point(seed, y);
     }
 
-    function mapInto(string memory input) internal view returns (G1Point memory) { // warning: function totally untested!
+    function mapInto(string memory input) internal returns (G1Point memory) { // warning: function totally untested!
         return mapInto(uint256(keccak256(abi.encodePacked(input))) % FIELD_ORDER);
     }
 
-    function mapInto(string memory input, uint256 i) internal view returns (G1Point memory) { // warning: function totally untested!
+    function mapInto(string memory input, uint256 i) internal returns (G1Point memory) { // warning: function totally untested!
         return mapInto(uint256(keccak256(abi.encodePacked(input, i))) % FIELD_ORDER);
         // ^^^ important: i haven't tested this, i.e. whether it agrees with ProofUtils.paddedHash(input, i) (cf. also the go version)
     }
