@@ -7,14 +7,12 @@ const Provider = require('./provider.js');
 (async () => {
     var provider = new Provider("ws://localhost:23000");
     const web3 = new Web3(await provider.getProvider());
-
     web3.transactionConfirmationBlocks = 1;
     var deployer = new Deployer();
     const zether = (await deployer.deployZetherVerifier()).contractAddress;
-    const burn = (await deployer.deployBurnVerifier()).contractAddress;
     const cash = (await deployer.deployCashToken()).contractAddress;
     await deployer.mintCashToken(cash);
-    const zsc = (await deployer.deployZSC(cash, zether, burn, 6)).contractAddress; // epoch length in seconds.
+    const zsc = (await deployer.deployZSC(cash, zether, 6)).contractAddress; // epoch length in seconds.
     await deployer.approveCashToken(cash, zsc)
     const deployed = new web3.eth.Contract(ZSC.abi, zsc);
 

@@ -1,13 +1,11 @@
 pragma solidity 0.5.11;
 
 import './ZetherVerifier.sol';
-import './BurnVerifier.sol';
 import './CashToken.sol';
 
 contract ZSC {
     CashToken coin;
     ZetherVerifier zetherverifier;
-    BurnVerifier burnverifier;
     uint256 public epochLength; // now in milliseconds.
 
     uint256 bTotal = 0; // could use erc20.balanceOf(this), but (even pure / view) calls cost gas during EVM execution
@@ -22,11 +20,10 @@ contract ZSC {
     event TransferOccurred(bytes32[2][] parties); // all parties will be notified, client can determine whether it was real or not.
     // arg is still necessary for transfers---not even so much to know when you received a transfer, as to know when you got rolled over.
 
-    constructor(address _coin, address _zether, address _burn, uint256 _epochLength) public {
+    constructor(address _coin, address _zether, uint256 _epochLength) public {
         // epoch length, like block.time, is in _seconds_. 4 is the minimum!!! (To allow a withdrawal to go through.)
         coin = CashToken(_coin);
         zetherverifier = ZetherVerifier(_zether);
-        burnverifier = BurnVerifier(_burn);
         epochLength = _epochLength;
     }
 
@@ -231,7 +228,6 @@ contract ZSC {
             }
         }
         require(!seen, "Nonce already seen!");
-        require(burnverifier.verifyBurn(scratch[0], scratch[1], y, bTransfer, lastGlobalUpdate, u, msg.sender, proof), "Burn proof verification failed!");
         require(coin.transfer(msg.sender, bTransfer), "This shouldn't fail... Something went severely wrong.");
         // note: change from Zether spec. should use bound address not msg.sender, to prevent "front-running attack".
         bTotal -= bTransfer;

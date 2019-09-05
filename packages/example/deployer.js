@@ -6,7 +6,7 @@ const ZSC = require("../contract-artifacts/artifacts/ZSC.json");
 
 class Deployer {
     constructor() {
-        const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:22000"))
+        const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:13889"))
         web3.transactionConfirmationBlocks = 1;
 
         this.deployZetherVerifier = () => {
@@ -121,7 +121,7 @@ class Deployer {
             });
         };
 
-        this.deployZSC = (cash, zether, burn, epochLength) => {
+        this.deployZSC = (cash, zether, epochLength) => {
             const abi = ZSC.abi;
             const bytecode = ZSC.bytecode;
             const contract = new web3.eth.Contract(abi);
@@ -129,7 +129,7 @@ class Deployer {
                 contract
                     .deploy({
                         data: bytecode,
-                        arguments: [cash, zether, burn, epochLength]
+                        arguments: [cash, zether, epochLength]
                     })
                     .send({
                         from: "0xed9d02e382b34818e88b88a309c7fe71e65f419d",
