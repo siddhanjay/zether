@@ -1,4 +1,3 @@
-const Web3 = require("web3");
 const {Qtum} = require('qtumjs');
 const Client = require("../anonymous.js/src/client.js");
 const ZSC = require("../contract-artifacts/artifacts/ZSC.json");
@@ -28,13 +27,17 @@ const ZetherVerifier_contract_data = require("./../contract-artifacts/artifacts/
 
     //const zether_address = (await deployer.deployZetherVerifier()).contractAddress;
     //const cash = (await deployer.deployCashToken()).contractAddress;
-    await deployer.mintCashToken(CashToken_contract);
-   // const zsc = (await deployer.deployZSC(cash, zether, 6)).contractAddress; // epoch length in seconds.
-    await deployer.approveCashToken(CashToken_contract.address, ZSC_contract.address);
-    const deployed = new web3.eth.Contract(ZSC.abi, zsc);
+
+
+    // await deployer.mintCashToken(CashToken_contract);
+    // const zsc = (await deployer.deployZSC(cash, zether, 6)).contractAddress; // epoch length in seconds.
+   // await deployer.approveCashToken(CashToken_contract, ZSC_contract);
+    
+   
+   const deployed = new web3.eth.Contract(ZSC.abi, zsc);
 
     const accounts = await web3.eth.getAccounts();
-    const client = new Client(deployed, accounts[0], web3);
+    const client = new Client(ZSC_contract, accounts[0], web3);
     await client.initialize();
     await client.deposit(10000);
     await client.withdraw(1000);
