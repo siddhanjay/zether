@@ -1,5 +1,5 @@
 const Web3 = require("web3");
-
+const Qtum = require("qtumjs")
 class Provider {
     constructor(address) {
         this.getProvider = () => {
