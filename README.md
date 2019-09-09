@@ -41,11 +41,14 @@ Compile each of them with ```solc contract_name.sol ```
 Note: The contact deployment doesn't work with the Qtum docker image as it used an outdated solidity compiler.
 
 3. Use solar to deploy all the contracts (set the contract deployer address first ```export QTUM_SENDER=your_address``` 
+
 ```solar deploy softwares/zether/packages/protocol/contracts/ZetherVerifier.sol```
+
 ```solar deploy softwares/zether/packages/protocol/contracts/CashToken.sol```
+
 ```solar deploy softwares/zether/packages/protocol/contracts/ZSC.sol '["zether_verifier_address","cashtoken_address",epoch length]'```
 
-Epoch length of atleast 4 is recommended.
+  Epoch length of atleast 4 is recommended.
 
 4. Install dependencies for the client demo 
 ``` npm install```
@@ -61,7 +64,8 @@ Epoch length of atleast 4 is recommended.
 The node.js demo client performs 4 operations. 
 1. It firsts mints and approves a few ZSC tokens for your address. 
 2. Makes a deposit to Zether contract
-3. Adds a few public addresses in the friend's anonymity set. Observers outside this set won't be able to distinguish between the transacting parties.
+3. Adds a few public addresses in the friend's anonymity set.
+   Observers outside this set won't be able to distinguish between the transacting parties.
 4. Transfers a few ZSC tokens to a friend
 5. Withdraw the remaing ZSC to get back Qtum tokens
 
