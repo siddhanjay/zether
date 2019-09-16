@@ -7,7 +7,7 @@ const bn128 = require('./utils/bn128.js');
 var sleep = (wait) => new Promise((resolve) => setTimeout(resolve, wait));
 
 class Client {
-    constructor(zsc, home, web3) {
+    constructor(zsc, home) {
         if (zsc === undefined)
             throw "Please provide an argument pointing to a deployed ZSC contract!";
         if (home === undefined)
